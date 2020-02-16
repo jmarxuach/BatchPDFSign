@@ -1,6 +1,6 @@
 # BatchPDFSign
 
-Command line tool for digital signature of PDF files, useful for example in Batch processes, from non Java programming languages like Php, etc...
+Command line tool for digital signature of PDF files, useful for example in Batch processes, from non Java programming languages like Php, Shell scripts, etc...
  
 BatchPDFSign is a command line to sign PDF file with a PKCS12 certificate.
 You need a PKCS12 certificate. It should be a <filename>.pfx file.
