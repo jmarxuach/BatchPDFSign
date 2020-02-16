@@ -1,8 +1,8 @@
 # BatchPDFSign
  Command line tool for digital signature of PDF files in Batch processes.
  
-This a command line to sign PDF file with a PKCS12 certificate.
-You need a private key certificate. It should be a <filename>.pfx file.
+BatchPDFSign is a command line to sign PDF file with a PKCS12 certificate.
+You need a PKCS12 certificate. It should be a <filename>.pfx file.
 You need a password for the .pfx
 A PDF file to sign.
 
