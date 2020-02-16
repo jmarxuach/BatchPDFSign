@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Main-Class: BatchPDFSign
+Class-Path: itext-1.4.jar commons-io-2.6.jar
+Created-By: Josep Marxuach
