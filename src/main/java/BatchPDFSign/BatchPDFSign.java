@@ -1,3 +1,5 @@
+package BatchPDFSign;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,8 +17,8 @@ import java.security.cert.CertificateException;
 import com.lowagie.text.pdf.PdfReader;
 import com.lowagie.text.pdf.PdfSignatureAppearance;
 import com.lowagie.text.pdf.PdfStamper;
+import org.apache.commons.io.FileUtils;
 
-import org.apache.commons.io.*;
 
 public class BatchPDFSign {
 
@@ -24,7 +26,7 @@ public class BatchPDFSign {
 	private static Certificate[] certificateChain;
 
 	private static String PRODUCTNAME = "BatchPDFSign";
-	private static String VERSION = "version 1.0";
+	private static String VERSION = "version 1.0.1";
 	private static String JAR_FILENAME = "JPdfSign.jar";
 
 	public static void main(String[] args) {
@@ -35,11 +37,11 @@ public class BatchPDFSign {
 		try {
 
 			boolean flgRename = true;
-			
+
 			String pkcs12FileName = args[0].trim();
-			
+
 			String PkcsPassword = args[1];
-			
+
 			String pdfInputFileName = args[2];
 			String pdfOutputFileName = pdfInputFileName + "_signed.pdf";
 			if (args.length == 4) {
@@ -86,18 +88,18 @@ public class BatchPDFSign {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-			InputFile.delete();	
-			// Renaming signed PDF file			
+			InputFile.delete();
+			// Renaming signed PDF file
 			if (flgRename) {
 				try {
 					FileUtils.moveFile(
-						      FileUtils.getFile(pdfOutputFileName), 
+						      FileUtils.getFile(pdfOutputFileName),
 						      FileUtils.getFile(pdfInputFileName));
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					System.err.println("Error renaming output file from " + pdfOutputFileName + " to " + pdfInputFileName );
 					e.printStackTrace();
-					
+
 				}
 			}
 
@@ -108,7 +110,7 @@ public class BatchPDFSign {
 		}
 	}
 	/**
-	 * Reads private Key 
+	 * Reads private Key
 	 * @param pkcs12FileName
 	 * @throws KeyStoreException
 	 */
