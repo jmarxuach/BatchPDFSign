@@ -77,7 +77,7 @@ public class BatchPDFSign {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-			PdfStamper stp = null;
+			PdfStamper stp;
 			try {
 				stp = PdfStamper.createSignature(reader, fout, '\0');
 				PdfSignatureAppearance sap = stp.getSignatureAppearance();

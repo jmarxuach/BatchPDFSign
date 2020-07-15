@@ -9,20 +9,44 @@ A PDF file to sign.
 
 You can create your own self signed certificate with this following 4 commands in ubuntu. Release includes this certificate with password <12345>.
 
-<code>openssl genrsa -aes128 -out myself.key 2048</code>
+```bash
+openssl genrsa -aes128 -out myself.key 2048
+```
 
-<code>openssl req -new -days 365 -key myself.key -out myself.csr</code>
+```bash
+openssl req -new -days 365 -key myself.key -out myself.csr
+```
 
-<code>openssl x509 -in myself.csr -out myself.crt -req -signkey myself.key -days 365</code>
+```bash
+openssl x509 -in myself.csr -out myself.crt -req -signkey myself.key -days 365
+```
 
-<code>openssl pkcs12 -export -out myself.pfx -inkey myself.key -in myself.crt</code>
+```bash
+openssl pkcs12 -export -out myself.pfx -inkey myself.key -in myself.crt
+```
 
 Then you can sign a PDF file with following command line.
 
-<code>java -jar BatchPDFSign.jar <certificate.pfx> "password" "filetosign.pdf"</code>
+```bash
+java -jar BatchPDFSign.jar <certificate.pfx> <password> <filetosign.pdf>
+```
+
+With a specific output file.
+```bash
+java -jar BatchPDFSign.jar <certificate.pfx> <password> <filetosign.pdf> <outputfile.pdf>
+```
 
 For the example included in the releases.
 
-<code>java -jar BatchPDFSign.jar myself.pfx "12345" "test.pdf"</code>
+```bash
+java -jar BatchPDFSign.jar myself.pfx 12345 test.pdf</code>
+```
+
+With an output file defined.
+
+```bash
+java -jar BatchPDFSign.jar myself.pfx 12345 test.pdf test-sig.pdf
+```
+
 
 That's all folks.
