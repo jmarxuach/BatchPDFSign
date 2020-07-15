@@ -9,9 +9,11 @@ import java.security.*;
 import java.util.NoSuchElementException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
+
+import com.itextpdf.text.pdf.PdfAConformanceLevel;
+import com.itextpdf.text.pdf.PdfAStamper;
 import com.itextpdf.text.pdf.PdfReader;
 import com.itextpdf.text.pdf.PdfSignatureAppearance;
-import com.itextpdf.text.pdf.PdfStamper;
 import com.itextpdf.text.pdf.security.*;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -74,12 +76,10 @@ public class BatchPDFSign {
 				e.printStackTrace();
 				System.exit(-1);
 			}
-			PdfStamper stp;
+			PdfAStamper stp;
 			try {
-
-				stp = PdfStamper.createSignature(reader, fout, '\0');
+				stp = PdfAStamper.createSignature(reader, fout, '\0', PdfAConformanceLevel.PDF_A_1B);
 				PdfSignatureAppearance sap = stp.getSignatureAppearance();
-				//sap.setCrypto(privateKey, certificateChain, null, PdfSignatureAppearance.WINCER_SIGNED);
 				ExternalDigest digest = new BouncyCastleDigest();
 				BouncyCastleProvider provider = new BouncyCastleProvider();
 				Security.addProvider(provider);
