@@ -5,19 +5,16 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
+import java.security.*;
 import java.util.NoSuchElementException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
-
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfSignatureAppearance;
-import com.lowagie.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.PdfReader;
+import com.itextpdf.text.pdf.PdfSignatureAppearance;
+import com.itextpdf.text.pdf.PdfStamper;
+import com.itextpdf.text.pdf.security.*;
 import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 
 public class BatchPDFSign {
@@ -79,9 +76,15 @@ public class BatchPDFSign {
 			}
 			PdfStamper stp;
 			try {
+
 				stp = PdfStamper.createSignature(reader, fout, '\0');
 				PdfSignatureAppearance sap = stp.getSignatureAppearance();
-				sap.setCrypto(privateKey, certificateChain, null, PdfSignatureAppearance.WINCER_SIGNED);
+				//sap.setCrypto(privateKey, certificateChain, null, PdfSignatureAppearance.WINCER_SIGNED);
+				ExternalDigest digest = new BouncyCastleDigest();
+				BouncyCastleProvider provider = new BouncyCastleProvider();
+				Security.addProvider(provider);
+				ExternalSignature signature = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256, provider.getName());
+				MakeSignature.signDetached(sap, digest, signature, certificateChain, null, null, null, 0, MakeSignature.CryptoStandard.CMS);
 				stp.close();
 			} catch (Exception e) {
 				System.err.println("An unknown error accoured while signing the PDF file:");
