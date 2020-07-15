@@ -45,7 +45,7 @@ java -jar BatchPDFSign.jar myself.pfx 12345 test.pdf</code>
 With an output file defined.
 
 ```bash
-java -jar BatchPDFSign.jar myself.pfx 12345 test.pdf test-sig.pdf</code>
+java -jar BatchPDFSign.jar myself.pfx 12345 test.pdf test-sig.pdf
 ```
 
 
