@@ -49,7 +49,7 @@
                     <finalName>BatchPDFSign</finalName>
                     <archive>
                         <manifest>
-                            <mainClass>BatchPDFSign.BatchPDFSign</mainClass>
+                            <mainClass>BatchPDFSign.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>
@@ -58,10 +58,20 @@
                     <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>7</source>
+                    <target>7</target>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
     <properties>
         <commons-io.version>2.7</commons-io.version>
         <itext.version>1.4</itext.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 </project>
