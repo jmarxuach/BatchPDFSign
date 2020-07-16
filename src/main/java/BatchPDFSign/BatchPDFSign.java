@@ -35,9 +35,11 @@ public class BatchPDFSign {
 
 	public BatchPDFSign(String[] args){
 		this(args[0], args[1], args[2]);
-		this.flgRename = !(args.length <= 4);
+		this.flgRename = !(args.length >= 4);
 		this.pdfA = args.length == 5;
-		if(!flgRename){
+		if(flgRename){
+			this.pdfOutputFileName = pdfInputFileName + "-sig";
+		} else {
 			this.setPdfOutputFileName(args[3]);
 		}
 		if(this.pdfA){
@@ -50,6 +52,7 @@ public class BatchPDFSign {
 		this.PkcsPassword = PkcsPassword;
 		this.pdfInputFileName = pdfInputFileName;
 		this.inputFile = new File(pdfInputFileName);
+		this.pdfOutputFileName = pdfInputFileName + "-sig";
 		this.flgRename = true;
 	}
 
@@ -103,7 +106,7 @@ public class BatchPDFSign {
 			}
 			readPrivateKeyFromPKCS12(pkcs12FileName, PkcsPassword);
 			PdfReader reader = new PdfReader(pdfInputFileName);
-			FileOutputStream fout = new FileOutputStream(pdfOutputFileName); //FIXME Nullpointer Exception
+			FileOutputStream fout = new FileOutputStream(pdfOutputFileName);
 			PdfSignatureAppearance sap;
 			if (this.pdfA){
 				PdfAStamper stp = PdfAStamper.createSignature(reader, fout, '\0', this.pdfAConformanceLevel);
