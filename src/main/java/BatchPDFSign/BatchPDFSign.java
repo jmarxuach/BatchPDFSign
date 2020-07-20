@@ -107,6 +107,7 @@ public class BatchPDFSign {
 			readPrivateKeyFromPKCS12(pkcs12FileName, PkcsPassword);
 			PdfReader reader = new PdfReader(pdfInputFileName);
 			FileOutputStream fout = new FileOutputStream(pdfOutputFileName);
+			TSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
 			PdfSignatureAppearance sap;
 			if (this.pdfA){
 				PdfAStamper stp = PdfAStamper.createSignature(reader, fout, '\0', this.pdfAConformanceLevel);
@@ -119,7 +120,7 @@ public class BatchPDFSign {
 			BouncyCastleProvider provider = new BouncyCastleProvider();
 			Security.addProvider(provider);
 			ExternalSignature signature = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256, provider.getName());
-			MakeSignature.signDetached(sap, digest, signature, certificateChain, null, null, null, 0, MakeSignature.CryptoStandard.CMS);
+			MakeSignature.signDetached(sap, digest, signature, certificateChain, null, null, tsaClient, 0, MakeSignature.CryptoStandard.CMS);
 
 			// Renaming signed PDF file
 			if (flgRename) {
