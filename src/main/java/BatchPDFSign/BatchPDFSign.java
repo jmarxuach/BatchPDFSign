@@ -22,10 +22,6 @@ public class BatchPDFSign {
 	private static PrivateKey privateKey;
 	private static Certificate[] certificateChain;
 
-	private static final String PRODUCTNAME = "BatchPDFSign";
-	private static final String VERSION = "version 1.0.2";
-	private static final String JAR_FILENAME = "BatchPDFSign.jar";
-
 	private final String pkcs12FileName;
 	private final String PkcsPassword;
 	private final String pdfInputFileName;
@@ -109,8 +105,9 @@ public class BatchPDFSign {
 	 * Sets the class variable pdfAConformanceLevel to the conformance level defined in the parameter pdfAFormat.
 	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
 	 * @param pdfAFormat Name of the conformance level the class variable pdfAConformanceLevel should be set to.
+	 * @throws IllegalArgumentException Is thrown if a non valid PDF/A format is given.
 	 */
-	public void setPDFA(String pdfAFormat){
+	public void setPDFA(String pdfAFormat) throws IllegalArgumentException{
 		switch (pdfAFormat) {
 			case "PDF_A_1A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_1A;
 			case "PDF_A_1B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_1B;
@@ -198,7 +195,7 @@ public class BatchPDFSign {
 	}
 
 	/**
-	 * Handles errors. can print stacktrace, usage and errormessages.
+	 * Handles errors. can print stacktrace, usage and error messages.
 	 * This Method is configurable by booleans.
 	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
 	 * @param e Exception.
@@ -220,12 +217,7 @@ public class BatchPDFSign {
 	 * @author Pep Marxuach, jmarxuach
 	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
 	 */
-	public static void showUsage() { //TODO Update
-		System.out.println("jPdfSign v" + VERSION + " \n");
-		System.out.println(PRODUCTNAME + " usage:");
-		System.out.println("\nFor using a PKCS#12 (.p12) file as signature certificate and private key source:");
-		System.out.print("\tjava -jar " + JAR_FILENAME);
-		System.out.println(" <pkcs12FileName> <pkcsPassword> <pdfInputFileName> <pdfOutputFileName>");
-		System.out.println("\n<pdfOutputFileName> is optional");
+	public static void showUsage() {
+		System.out.println("java -jar BatchPDFSign.jar certificate.pfx password filetosign.pdf [outputfile.pdf] [PDFAFormat]");
 	}
 }
