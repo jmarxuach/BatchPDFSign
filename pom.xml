@@ -15,12 +15,13 @@
         <!-- itextpdf.com -->
         <dependency>
             <groupId>com.itextpdf</groupId>
-            <artifactId>itextpdf</artifactId>
+            <artifactId>itext7-core</artifactId>
             <version>${itext.version}</version>
+            <type>pom</type>
         </dependency>
         <dependency>
             <groupId>com.itextpdf</groupId>
-            <artifactId>itext-pdfa</artifactId>
+            <artifactId>pdfa</artifactId>
             <version>${itext.version}</version>
         </dependency>
         <!-- bouncycastle.org -->
@@ -71,7 +72,7 @@
     </build>
     <properties>
         <commons-io.version>2.7</commons-io.version>
-        <itext.version>5.5.13.1</itext.version>
+        <itext.version>7.1.11</itext.version>
         <bouncycastle.version>1.66</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

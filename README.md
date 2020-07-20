@@ -55,10 +55,6 @@ Following PDF/A formats are supported:
 - PDF_A_3A 
 - PDF_A_3B 
 - PDF_A_3U 
-- ZUGFeRD
-- ZUGFeRDBasic
-- ZUGFeRDComfort
-- ZUGFeRDExtended
 
 ## Development
 You'll need:

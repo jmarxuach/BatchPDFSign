@@ -1,8 +1,8 @@
 package BatchPDFSign;
 
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.*;
-import com.itextpdf.text.pdf.security.*;
+import com.itextpdf.kernel.pdf.PdfAConformanceLevel;
+import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.signatures.*;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -117,10 +117,6 @@ public class BatchPDFSign {
 			case "PDF_A_3A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3A;
 			case "PDF_A_3B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3B;
 			case "PDF_A_3U" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3U;
-			case "ZUGFeRD" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRD;
-			case "ZUGFeRDBasic" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRDBasic;
-			case "ZUGFeRDComfort" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRDComfort;
-			case "ZUGFeRDExtended" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRDExtended;
 			default -> throw new IllegalArgumentException();
 		}
 	}
@@ -163,7 +159,7 @@ public class BatchPDFSign {
 					throw new FileNotFoundException();
 				}
 			}
-		} catch (IOException | DocumentException e){
+		} catch (IOException e){
 			errorHandling(e, "The PDF file wasn't found or wasn't readable. Please check if you entered the correct file, if it exists and if the permissions are set correctly.", false, true);
 		} catch (GeneralSecurityException e) {
 			errorHandling(e, "A fatal error occurred, please contact the developer with the following details:", true, false);
