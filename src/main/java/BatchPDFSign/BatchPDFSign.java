@@ -1,174 +1,223 @@
 package BatchPDFSign;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
-import java.security.UnrecoverableKeyException;
-import java.util.NoSuchElementException;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.*;
+import com.itextpdf.text.pdf.security.*;
+import org.apache.commons.io.FileUtils;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
+
+import java.io.*;
+import java.security.*;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 
-import com.lowagie.text.pdf.PdfReader;
-import com.lowagie.text.pdf.PdfSignatureAppearance;
-import com.lowagie.text.pdf.PdfStamper;
-import org.apache.commons.io.FileUtils;
-
-
+/**
+ * Signs PDF files and retains PDF/A conformity if wanted.
+ * @author Pep Marxuach, jmarxuach
+ * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+ * @version 1.0.2
+ */
 public class BatchPDFSign {
 
 	private static PrivateKey privateKey;
 	private static Certificate[] certificateChain;
 
-	private static String PRODUCTNAME = "BatchPDFSign";
-	private static String VERSION = "version 1.0.1";
-	private static String JAR_FILENAME = "JPdfSign.jar";
+	private final String pkcs12FileName;
+	private final String PkcsPassword;
+	private final String pdfInputFileName;
+	private String pdfOutputFileName;
 
-	public static void main(String[] args) {
+	private boolean flgRename;
+	private boolean pdfA;
 
-		if (args.length < 3)
-			showUsage();
+	private PdfAConformanceLevel pdfAConformanceLevel;
 
-		try {
+	private final File inputFile;
 
-			boolean flgRename = true;
+	/**
+	 * Constructor for when the jar is executed directly.
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param args arguments received from the commandline.
+	 */
+	public BatchPDFSign(String[] args){
+		this(args[0], args[1], args[2]);
+		this.flgRename = !(args.length >= 4);
+		this.pdfA = args.length == 5;
+		if(flgRename){
+			this.pdfOutputFileName = pdfInputFileName + "-sig";
+		} else {
+			this.pdfOutputFileName = args[3];
+		}
+		if(this.pdfA){
+			this.setPDFA(args[4]);
+		}
+	}
 
-			String pkcs12FileName = args[0].trim();
+	/**
+	 * The most basic constructor, only initializes the file name, the file password and the pdf which should be signed class variable.
+	 * This constructor is called by every other constructor.
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param pkcs12FileName File name of the key.
+	 * @param PkcsPassword Password of the key.
+	 * @param pdfInputFileName File name of the PDF file which should be signed.
+	 */
+	public BatchPDFSign(String pkcs12FileName, String PkcsPassword, String pdfInputFileName){
+		this.pkcs12FileName = pkcs12FileName;
+		this.PkcsPassword = PkcsPassword;
+		this.pdfInputFileName = pdfInputFileName;
+		this.inputFile = new File(pdfInputFileName);
+		this.pdfOutputFileName = pdfInputFileName + "-sig";
+		this.flgRename = true;
+	}
 
-			String PkcsPassword = args[1];
+	/**
+	 * The constructor which is called if the PDF file which is signed, shouldn't be overwritten.
+	 * This constructor calls the basic constructor.
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param pkcs12FileName File name of the key.
+	 * @param PkcsPassword Password of the key.
+	 * @param pdfInputFileName File name of the PDF file which should be signed.
+	 * @param pdfOutputFileName File name which the signed PDF should have.
+	 */
+	public BatchPDFSign(String pkcs12FileName, String PkcsPassword, String pdfInputFileName, String pdfOutputFileName){
+		this(pkcs12FileName, PkcsPassword, pdfInputFileName);
+		this.pdfOutputFileName = pdfOutputFileName;
+		this.flgRename = false;
+	}
 
-			String pdfInputFileName = args[2];
-			String pdfOutputFileName = pdfInputFileName + "_signed.pdf";
-			if (args.length == 4) {
-				pdfOutputFileName = args[3];
-				flgRename = false;
-			}
-			// PDF input file
-			File InputFile = new File(pdfInputFileName);
+	/**
+	 * The PDF/A Constructor, only works when a output file is defined aswell.
+	 * This constructor calls the (String, String, String, String) constructor.
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param pkcs12FileName File name of the key.
+	 * @param PkcsPassword Password of the key.
+	 * @param pdfInputFileName File name of the PDF file which should be signed.
+	 * @param pdfOutputFileName File name of the PDF file which should be signed.
+	 * @param pdfAFormat Name of the PDF/A format.
+	 */
+	public BatchPDFSign(String pkcs12FileName, String PkcsPassword, String pdfInputFileName, String pdfOutputFileName, String pdfAFormat){
+		this(pkcs12FileName, PkcsPassword, pdfInputFileName, pdfOutputFileName);
+		this.pdfA = true;
+		this.setPDFA(pdfAFormat);
+	}
+
+	/**
+	 * Sets the class variable pdfAConformanceLevel to the conformance level defined in the parameter pdfAFormat.
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param pdfAFormat Name of the conformance level the class variable pdfAConformanceLevel should be set to.
+	 * @throws IllegalArgumentException Is thrown if a non valid PDF/A format is given.
+	 */
+	public void setPDFA(String pdfAFormat) throws IllegalArgumentException{
+		switch (pdfAFormat) {
+			case "PDF_A_1A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_1A;
+			case "PDF_A_1B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_1B;
+			case "PDF_A_2A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_2A;
+			case "PDF_A_2B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_2B;
+			case "PDF_A_2U" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_2U;
+			case "PDF_A_3A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3A;
+			case "PDF_A_3B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3B;
+			case "PDF_A_3U" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3U;
+			case "ZUGFeRD" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRD;
+			case "ZUGFeRDBasic" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRDBasic;
+			case "ZUGFeRDComfort" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRDComfort;
+			case "ZUGFeRDExtended" -> this.pdfAConformanceLevel = PdfAConformanceLevel.ZUGFeRDExtended;
+			default -> throw new IllegalArgumentException();
+		}
+	}
+
+	/**
+	 * Signs a PDF file. This method is configured by the constructors of this class.
+	 * @author Pep Marxuach, jmarxuach
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 */
+	public void signFile() {
+		try{
 			// Check PDF input file
-			if (!InputFile.exists() || InputFile.isDirectory()) {
-				System.out.println("");
-				System.out.println("PDf file not found !");
-				showUsage();
+			if (!inputFile.exists() || inputFile.isDirectory()) {
+				throw new FileNotFoundException();
 			}
-
 			readPrivateKeyFromPKCS12(pkcs12FileName, PkcsPassword);
+			PdfReader reader = new PdfReader(pdfInputFileName);
+			FileOutputStream fout = new FileOutputStream(pdfOutputFileName);
+			TSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
+			PdfSignatureAppearance sap;
+			if (this.pdfA){
+				PdfAStamper stp = PdfAStamper.createSignature(reader, fout, '\0', this.pdfAConformanceLevel);
+				sap = stp.getSignatureAppearance();
+			}else{
+				PdfStamper stp = PdfAStamper.createSignature(reader, fout, '\0');
+				sap = stp.getSignatureAppearance();
+			}
+			ExternalDigest digest = new BouncyCastleDigest();
+			BouncyCastleProvider provider = new BouncyCastleProvider();
+			Security.addProvider(provider);
+			ExternalSignature signature = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256, provider.getName());
+			MakeSignature.signDetached(sap, digest, signature, certificateChain, null, null, tsaClient, 0, MakeSignature.CryptoStandard.CMS);
 
-			PdfReader reader = null;
-			try {
-				reader = new PdfReader(pdfInputFileName);
-			} catch (IOException e) {
-				System.err.println(
-						"An unknown error accoured while opening the input PDF file: \"" + pdfInputFileName + "\"");
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			FileOutputStream fout = null;
-			try {
-				fout = new FileOutputStream(pdfOutputFileName);
-			} catch (FileNotFoundException e) {
-				System.err.println(
-						"An unknown error accoured while opening the output PDF file: \"" + pdfOutputFileName + "\"");
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			PdfStamper stp;
-			try {
-				stp = PdfStamper.createSignature(reader, fout, '\0');
-				PdfSignatureAppearance sap = stp.getSignatureAppearance();
-				sap.setCrypto(privateKey, certificateChain, null, PdfSignatureAppearance.WINCER_SIGNED);
-				stp.close();
-			} catch (Exception e) {
-				System.err.println("An unknown error accoured while signing the PDF file:");
-				e.printStackTrace();
-				System.exit(-1);
-			}
-			InputFile.delete();
 			// Renaming signed PDF file
 			if (flgRename) {
-				try {
-					FileUtils.moveFile(
-						      FileUtils.getFile(pdfOutputFileName),
-						      FileUtils.getFile(pdfInputFileName));
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					System.err.println("Error renaming output file from " + pdfOutputFileName + " to " + pdfInputFileName );
-					e.printStackTrace();
-
+				if (this.inputFile.delete())
+				{
+					FileUtils.moveFile(FileUtils.getFile(pdfOutputFileName), FileUtils.getFile(pdfInputFileName));
+				} else {
+					throw new FileNotFoundException();
 				}
 			}
-
-		} catch (KeyStoreException kse) {
-			System.err.println("An unknown error accoured while initializing the KeyStore instance:");
-			kse.printStackTrace();
-			System.exit(-1);
+		} catch (IOException | DocumentException e){
+			errorHandling(e, "The PDF file wasn't found or wasn't readable. Please check if you entered the correct file, if it exists and if the permissions are set correctly.", false, true);
+		} catch (GeneralSecurityException e) {
+			errorHandling(e, "A fatal error occurred, please contact the developer with the following details:", true, false);
 		}
 	}
+
 	/**
-	 * Reads private Key
-	 * @param pkcs12FileName
-	 * @throws KeyStoreException
+	 * Loads the signer key from the file.
+	 * @author Pep Marxuach, jmarxuach
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param pkcs12FileName File name of the key file.
+	 * @param pkcs12Password Password to unlock the key file.
 	 */
-	protected static void readPrivateKeyFromPKCS12(String pkcs12FileName, String pkcs12Password) throws KeyStoreException {
-
-		KeyStore ks = null;
-
+	protected static void readPrivateKeyFromPKCS12 (String pkcs12FileName, String pkcs12Password)  {
 		try {
-			ks = KeyStore.getInstance("pkcs12");
+			KeyStore ks = KeyStore.getInstance("pkcs12");
 			ks.load(new FileInputStream(pkcs12FileName), pkcs12Password.toCharArray());
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println("An unknown error accoured while reading the PKCS#12 file (Password could be wrong):");
-			e.printStackTrace();
-			System.exit(-1);
-		} catch (CertificateException e) {
-			System.err.println("An unknown error accoured while reading the PKCS#12 file:");
-			e.printStackTrace();
-			System.exit(-1);
-		} catch (FileNotFoundException e) {
-			System.err.println("Unable to open the PKCS#12 keystore file \"" + pkcs12FileName + "\":");
-			System.err.println("The file does not exists or missing read permission.");
-			System.exit(-1);
-		} catch (IOException e) {
-			System.err.println("An unknown error accoured while reading the PKCS#12 file: IOException");
-			e.printStackTrace();
-			System.exit(-1);
-		}
-		String alias = "";
-		try {
-			alias = (String) ks.aliases().nextElement();
+			String alias = ks.aliases().nextElement();
 			privateKey = (PrivateKey) ks.getKey(alias, pkcs12Password.toCharArray());
-		} catch (NoSuchElementException e) {
-			System.err.println("An unknown error accoured while retrieving the private key:");
-			System.err.println("The selected PKCS#12 file does not contain any private keys.");
-			e.printStackTrace();
-			System.exit(-1);
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println("An unknown error accoured while retrieving the private key:");
-			e.printStackTrace();
-			System.exit(-1);
-		} catch (UnrecoverableKeyException e) {
-			System.err.println("An unknown error accoured while retrieving the private key:");
-			e.printStackTrace();
-			System.exit(-1);
+			certificateChain = ks.getCertificateChain(alias);
 		}
-		certificateChain = ks.getCertificateChain(alias);
+		catch (UnrecoverableKeyException e){
+			errorHandling(e, "The Key could not be recovered. The password was probably entered incorrectly", false, true);
+		} catch (KeyStoreException | CertificateException | NoSuchAlgorithmException e){
+			errorHandling(e, "Key has an invalid signature. Please check if you entered the correct file.", false, true);
+		} catch (IOException e) {
+			errorHandling(e, "Key file wasn't found or wasn't readable. Please check if you entered the correct file, if it exists and if the permissions are set correctly.", false, true);
+		}
+	}
+
+	/**
+	 * Handles errors. can print stacktrace, usage and error messages.
+	 * This Method is configurable by booleans.
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
+	 * @param e Exception.
+	 * @param errorMessage Error message for the user.
+	 * @param printStacktrace Should it print the stacktrace?
+	 * @param showUsage Should it call the showUsage() method?
+	 */
+	public static void errorHandling(Exception e, String errorMessage, Boolean printStacktrace, Boolean showUsage){
+		System.err.println(errorMessage);
+		if (e != null && printStacktrace){
+			e.printStackTrace();
+		}
+		if (showUsage){
+			showUsage();
+		}
 	}
 	/**
-	 * Message shown when error in parameters
+	 * Basic help and usage documentation.
+	 * @author Pep Marxuach, jmarxuach
+	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
 	 */
 	public static void showUsage() {
-		System.out.println("jPdfSign v" + VERSION + " \n");
-		System.out.println(PRODUCTNAME + " usage:");
-		System.out.println("\nFor using a PKCS#12 (.p12) file as signature certificate and private key source:");
-		System.out.print("\tjava -jar " + JAR_FILENAME);
-		System.out.println(" <pkcs12FileName> <pkcsPassword> <pdfInputFileName> <pdfOutputFileName>");
-		System.out.println("\n<pdfOutputFileName> is optional");
-		System.exit(0);
+		System.out.println("java -jar BatchPDFSign.jar certificate.pfx password filetosign.pdf [outputfile.pdf] [PDFAFormat]");
 	}
-
 }
