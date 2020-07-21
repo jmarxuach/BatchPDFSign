@@ -44,6 +44,6 @@ If this parameter is set, a new file with this name will be created and signed. 
 ## Development
 You'll need:
 - Maven
-- Java 14 JDK
+- Java 8 JDK
 
 That's all folks.
