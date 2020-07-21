@@ -20,10 +20,10 @@ openssl pkcs12 -export -out myself.pfx -inkey myself.key -in myself.crt
 ## Signing
 Example:
 ```bash
-java -jar BatchPDFSign.jar myCertificate.pfx mySecurePassword myPdfFile.pdf outputfile.pdf PDF_A_1A
+java -jar BatchPDFSign.jar myCertificate.pfx mySecurePassword myPdfFile.pdf outputfile.pdf
 ```
 ### Synopsis
-**java -jar BatchPDFSign.jar** _certificate.pfx_ _password_ _filetosign.pdf_ \[outputfile.pdf] \[PDFAFormat]  
+**java -jar BatchPDFSign.jar** _certificate.pfx_ _password_ _filetosign.pdf_ \[outputfile.pdf]
 
 - **type exactly as shown**
 - _replace with appropriate argument_
@@ -40,25 +40,6 @@ The file you want to sign.
 
 ### outputfile
 If this parameter is set, a new file with this name will be created and signed. The original file will remain untouched.
-
-### PDFAFormat 
-The PDF/A Format of the file, if this flag is set, the flag "outputfile" also needs to be set.
-More information can be found in the chapter PDF/A.
-
-## PDF/A
-Following PDF/A formats are supported:
-- PDF_A_1A 
-- PDF_A_1B 
-- PDF_A_2A 
-- PDF_A_2B 
-- PDF_A_2U 
-- PDF_A_3A 
-- PDF_A_3B 
-- PDF_A_3U 
-- ZUGFeRD
-- ZUGFeRDBasic
-- ZUGFeRDComfort
-- ZUGFeRDExtended
 
 ## Development
 You'll need:
