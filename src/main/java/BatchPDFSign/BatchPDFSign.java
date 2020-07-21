@@ -1,7 +1,7 @@
 package BatchPDFSign;
 
-import com.itextpdf.kernel.pdf.PdfAConformanceLevel;
 import com.itextpdf.kernel.pdf.PdfReader;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.*;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -26,12 +26,7 @@ public class BatchPDFSign {
 	private final String PkcsPassword;
 	private final String pdfInputFileName;
 	private String pdfOutputFileName;
-
 	private boolean flgRename;
-	private boolean pdfA;
-
-	private PdfAConformanceLevel pdfAConformanceLevel;
-
 	private final File inputFile;
 
 	/**
@@ -42,14 +37,10 @@ public class BatchPDFSign {
 	public BatchPDFSign(String[] args){
 		this(args[0], args[1], args[2]);
 		this.flgRename = !(args.length >= 4);
-		this.pdfA = args.length == 5;
 		if(flgRename){
 			this.pdfOutputFileName = pdfInputFileName + "-sig";
 		} else {
 			this.pdfOutputFileName = args[3];
-		}
-		if(this.pdfA){
-			this.setPDFA(args[4]);
 		}
 	}
 
@@ -86,42 +77,6 @@ public class BatchPDFSign {
 	}
 
 	/**
-	 * The PDF/A Constructor, only works when a output file is defined aswell.
-	 * This constructor calls the (String, String, String, String) constructor.
-	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
-	 * @param pkcs12FileName File name of the key.
-	 * @param PkcsPassword Password of the key.
-	 * @param pdfInputFileName File name of the PDF file which should be signed.
-	 * @param pdfOutputFileName File name of the PDF file which should be signed.
-	 * @param pdfAFormat Name of the PDF/A format.
-	 */
-	public BatchPDFSign(String pkcs12FileName, String PkcsPassword, String pdfInputFileName, String pdfOutputFileName, String pdfAFormat){
-		this(pkcs12FileName, PkcsPassword, pdfInputFileName, pdfOutputFileName);
-		this.pdfA = true;
-		this.setPDFA(pdfAFormat);
-	}
-
-	/**
-	 * Sets the class variable pdfAConformanceLevel to the conformance level defined in the parameter pdfAFormat.
-	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
-	 * @param pdfAFormat Name of the conformance level the class variable pdfAConformanceLevel should be set to.
-	 * @throws IllegalArgumentException Is thrown if a non valid PDF/A format is given.
-	 */
-	public void setPDFA(String pdfAFormat) throws IllegalArgumentException{
-		switch (pdfAFormat) {
-			case "PDF_A_1A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_1A;
-			case "PDF_A_1B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_1B;
-			case "PDF_A_2A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_2A;
-			case "PDF_A_2B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_2B;
-			case "PDF_A_2U" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_2U;
-			case "PDF_A_3A" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3A;
-			case "PDF_A_3B" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3B;
-			case "PDF_A_3U" -> this.pdfAConformanceLevel = PdfAConformanceLevel.PDF_A_3U;
-			default -> throw new IllegalArgumentException();
-		}
-	}
-
-	/**
 	 * Signs a PDF file. This method is configured by the constructors of this class.
 	 * @author Pep Marxuach, jmarxuach
 	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
@@ -134,21 +89,15 @@ public class BatchPDFSign {
 			}
 			readPrivateKeyFromPKCS12(pkcs12FileName, PkcsPassword);
 			PdfReader reader = new PdfReader(pdfInputFileName);
-			FileOutputStream fout = new FileOutputStream(pdfOutputFileName);
-			TSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
-			PdfSignatureAppearance sap;
-			if (this.pdfA){
-				PdfAStamper stp = PdfAStamper.createSignature(reader, fout, '\0', this.pdfAConformanceLevel);
-				sap = stp.getSignatureAppearance();
-			}else{
-				PdfStamper stp = PdfAStamper.createSignature(reader, fout, '\0');
-				sap = stp.getSignatureAppearance();
-			}
-			ExternalDigest digest = new BouncyCastleDigest();
+			ITSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
+			StampingProperties properties = new StampingProperties().preserveEncryption().useAppendMode();
+			PdfSigner signer = new PdfSigner(reader, new FileOutputStream(pdfOutputFileName), properties);
+			signer.timestamp(tsaClient, "time");
+			IExternalDigest digest = new BouncyCastleDigest();
 			BouncyCastleProvider provider = new BouncyCastleProvider();
 			Security.addProvider(provider);
-			ExternalSignature signature = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256, provider.getName());
-			MakeSignature.signDetached(sap, digest, signature, certificateChain, null, null, tsaClient, 0, MakeSignature.CryptoStandard.CMS);
+			IExternalSignature signature = new PrivateKeySignature(privateKey, DigestAlgorithms.SHA256, provider.getName());
+			signer.signDetached(digest, signature, certificateChain, null, null, tsaClient, 0, PdfSigner.CryptoStandard.CMS);
 
 			// Renaming signed PDF file
 			if (flgRename) {
@@ -214,6 +163,6 @@ public class BatchPDFSign {
 	 * @author Joe Meier, Jocomol, joelmeier08@gmail.com
 	 */
 	public static void showUsage() {
-		System.out.println("java -jar BatchPDFSign.jar certificate.pfx password filetosign.pdf [outputfile.pdf] [PDFAFormat]");
+		System.out.println("java -jar BatchPDFSign.jar certificate.pfx password filetosign.pdf [outputfile.pdf]");
 	}
 }
