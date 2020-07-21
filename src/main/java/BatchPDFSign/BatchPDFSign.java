@@ -92,7 +92,6 @@ public class BatchPDFSign {
 			ITSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
 			StampingProperties properties = new StampingProperties().preserveEncryption().useAppendMode();
 			PdfSigner signer = new PdfSigner(reader, new FileOutputStream(pdfOutputFileName), properties);
-			signer.timestamp(tsaClient, "time");
 			IExternalDigest digest = new BouncyCastleDigest();
 			BouncyCastleProvider provider = new BouncyCastleProvider();
 			Security.addProvider(provider);
@@ -109,7 +108,7 @@ public class BatchPDFSign {
 				}
 			}
 		} catch (IOException e){
-			errorHandling(e, "The PDF file wasn't found or wasn't readable. Please check if you entered the correct file, if it exists and if the permissions are set correctly.", false, true);
+			errorHandling(e, "The PDF file wasn't found or wasn't readable. Please check if you entered the correct file, if it exists and if the permissions are set correctly.", true, true);
 		} catch (GeneralSecurityException e) {
 			errorHandling(e, "A fatal error occurred, please contact the developer with the following details:", true, false);
 		}
