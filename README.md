@@ -21,12 +21,12 @@ openssl pkcs12 -export -out myself.pfx -inkey myself.key -in myself.crt
 
 ## Signing
 ### Synopsis
-required options: i, k, p
-usage: BatchPDFSign
- -i,--input <arg>      input file path
- -k,--key <arg>        key file path
- -o,--output <arg>     output file
- -p,--password <arg>   keyfile password
+required options: i, k, p  
+usage: BatchPDFSign  
+ -i,--input <arg>      input file path  
+ -k,--key <arg>        key file path  
+ -o,--output <arg>     output file  
+ -p,--password <arg>   keyfile password  
 
 ### key file path
 This parameter is the certificate you want to sign the pdf with. It can be generated with the code documented in the chapter self signed certificate creation.
