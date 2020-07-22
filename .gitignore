@@ -22,6 +22,7 @@
 # IDE Files
 .idea
 .classpath
+*.iml
 
 # Maven
 target
