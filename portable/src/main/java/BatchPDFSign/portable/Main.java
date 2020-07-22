@@ -1,5 +1,6 @@
-package BatchPDFSign;
+package BatchPDFSign.portable;
 
+import BatchPDFSign.lib.BatchPDFSign;
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
@@ -9,7 +10,7 @@ import java.security.GeneralSecurityException;
  * This method is called when the jar is executed. It shows the help if parameters weren't given correctly.
  * If the correct parameters were given, it creates a BatchPDFSign Object and calls the signFile(); function on it.
  * @author Joe Meier, Jocomol, joelmeier08@gmail.com
- * @version 1.0.4
+ * @version 1.0.5
  */
 public class Main {
     public static void main(String[] args){
@@ -47,7 +48,7 @@ public class Main {
             batchPDFSign.signFile();
         } catch (GeneralSecurityException | IOException | ParseException e) {
             System.out.println(e.getMessage());
-            formatter.printHelp("BatchPDFSign", options);
+            formatter.printHelp("BatchPDFSignPortable", options);
             System.exit(1);
         }
     }

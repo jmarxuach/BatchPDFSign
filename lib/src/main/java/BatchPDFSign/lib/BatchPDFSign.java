@@ -1,4 +1,4 @@
-package BatchPDFSign;
+package BatchPDFSign.lib;
 
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
@@ -15,7 +15,7 @@ import java.security.cert.CertificateException;
  * Signs PDF files and retains PDF/A conformity.
  * @author Pep Marxuach, jmarxuach
  * @author Joe Meier, Jocomol, joelmeier08@gmail.com
- * @version 1.0.4
+ * @version 1.0.5
  */
 public class BatchPDFSign {
 
