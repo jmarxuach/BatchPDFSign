@@ -5,6 +5,13 @@
     <groupId>BatchPDFSign</groupId>
     <version>1.0.5</version>
     <packaging>jar</packaging>
+    <distributionManagement>
+        <repository>
+            <id>github</id>
+            <name>GitHub Jocomol Apache Maven Packages</name>
+            <url>https://maven.pkg.github.com/Jocomol/BatchPDFSign</url>
+        </repository>
+    </distributionManagement>
     <dependencies>
         <!-- commons.apache.org -->
         <dependency>
