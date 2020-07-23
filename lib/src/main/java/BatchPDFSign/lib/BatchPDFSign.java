@@ -15,7 +15,7 @@ import java.security.cert.CertificateException;
  * Signs PDF files and retains PDF/A conformity.
  * @author Pep Marxuach, jmarxuach
  * @author Joe Meier, Jocomol, joelmeier08@gmail.com
- * @version 1.0.5
+ * @version 1.0.5.1
  */
 public class BatchPDFSign {
 
@@ -68,7 +68,7 @@ public class BatchPDFSign {
 		readPrivateKeyFromPKCS12(pkcs12FileName, PkcsPassword);
 		PdfReader reader = new PdfReader(pdfInputFileName);
 		ITSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
-		StampingProperties properties = new StampingProperties().preserveEncryption().useAppendMode();
+		StampingProperties properties = new StampingProperties().preserveEncryption();
 		PdfSigner signer = new PdfSigner(reader, new FileOutputStream(pdfOutputFileName), properties);
 		IExternalDigest digest = new BouncyCastleDigest();
 		BouncyCastleProvider provider = new BouncyCastleProvider();
