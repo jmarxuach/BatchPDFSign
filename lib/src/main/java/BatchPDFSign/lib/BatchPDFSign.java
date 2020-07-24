@@ -15,7 +15,7 @@ import java.security.cert.CertificateException;
  * Signs PDF files and retains PDF/A conformity.
  * @author Pep Marxuach, jmarxuach
  * @author Joe Meier, Jocomol, joelmeier08@gmail.com
- * @version 1.0.5.1
+ * @version 1.0.5.2
  */
 public class BatchPDFSign {
 
