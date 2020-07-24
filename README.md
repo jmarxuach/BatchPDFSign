@@ -1,9 +1,7 @@
 # BatchPDFSign
 
-![Maven Package](https://github.com/Jocomol/BatchPDFSign/workflows/Maven%20Package/badge.svg)  
-
-![Java CI with Maven](https://github.com/Jocomol/BatchPDFSign/workflows/Java%20CI%20with%20Maven/badge.svg)  
-
+![Maven Package](https://github.com/jmarxuach/BatchPDFSign/workflows/Maven%20Package/badge.svg)
+![Java CI with Maven](https://github.com/jmarxuach/BatchPDFSign/workflows/Java%20CI%20with%20Maven/badge.svg)
 
 
 Command line tool for digital signature of PDF files, useful for example in Batch processes, from non Java programming languages like Php, Shell scripts, etc...
