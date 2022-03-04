@@ -3,6 +3,7 @@ package BatchPDFSign.lib;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.signatures.*;
+import com.itextpdf.kernel.geom.Rectangle;
 import org.apache.commons.io.FileUtils;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -59,7 +60,7 @@ public class BatchPDFSign {
 	 * @throws IOException A File couldn't be opened.
 	 * @throws GeneralSecurityException Some permissions aren't right.
 	 */
-	public void signFile() throws IOException, GeneralSecurityException {
+	public void signFile(int page, float rx, float ry, float rw, float rh, float fs, String signtext) throws IOException, GeneralSecurityException {
 
 		// Check PDF input file
 		if (!inputFile.exists() || inputFile.isDirectory()) {
@@ -70,6 +71,15 @@ public class BatchPDFSign {
 		ITSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
 		StampingProperties properties = new StampingProperties().preserveEncryption();
 		PdfSigner signer = new PdfSigner(reader, new FileOutputStream(pdfOutputFileName), properties);
+		if (page > 0) {
+			PdfSignatureAppearance appearance = signer.getSignatureAppearance();
+			appearance.setPageNumber(page);
+			appearance.setPageRect(new Rectangle(rx, ry, rw, rh));
+			appearance.setLayer2FontSize(fs);
+			if (signtext != null) {
+				appearance.setLayer2Text(signtext);
+			}
+		}
 		IExternalDigest digest = new BouncyCastleDigest();
 		BouncyCastleProvider provider = new BouncyCastleProvider();
 		Security.addProvider(provider);
@@ -85,6 +95,9 @@ public class BatchPDFSign {
 				throw new IOException("File: " + this.inputFile + " couldn't be deleted");
 			}
 		}
+	}
+	public void signFile() throws IOException, GeneralSecurityException {
+		this.signFile(0, 0, 0, 0, 0, 10, "");
 	}
 
 	/**

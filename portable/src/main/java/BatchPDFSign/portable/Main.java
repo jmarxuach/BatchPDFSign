@@ -33,6 +33,34 @@ public class Main {
         output.setRequired(false);
         options.addOption(output);
 
+        Option pageOpt = new Option("", "page", true, "page of signature rectangle; needs to be specified to output signature rectangle");
+        output.setRequired(false);
+        options.addOption(pageOpt);
+
+        Option rectPosXOpt = new Option("", "rx", true, "x position of signature rectangle");
+        output.setRequired(false);
+        options.addOption(rectPosXOpt);
+
+        Option rectPosYOpt = new Option("", "ry", true, "y position of signature rectangle");
+        output.setRequired(false);
+        options.addOption(rectPosYOpt);
+
+        Option rectWidthOpt = new Option("", "rw", true, "width of signature rectangle");
+        output.setRequired(false);
+        options.addOption(rectWidthOpt);
+
+        Option rectHeightOpt = new Option("", "rh", true, "height of signature rectangle");
+        output.setRequired(false);
+        options.addOption(rectHeightOpt);
+
+        Option fontsizeOpt = new Option("", "fs", true, "height of signature rectangle");
+        output.setRequired(false);
+        options.addOption(fontsizeOpt);
+
+        Option signTextOpt = new Option("", "signtext", true, "signature text");
+        output.setRequired(false);
+        options.addOption(signTextOpt);
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
@@ -45,7 +73,29 @@ public class Main {
             String passwordString = cmd.getOptionValue("password");
             BatchPDFSign batchPDFSign;
             batchPDFSign = new BatchPDFSign(keyFilePath, passwordString, inputFilePath, outputFilePath);
-            batchPDFSign.signFile();
+            if (cmd.hasOption("page")) {
+                if (!cmd.hasOption("rx") || !cmd.hasOption("ry") ||
+                    !cmd.hasOption("rw") || !cmd.hasOption("rh")) {
+                    System.out.println("If a page is specified, all of the options --rx --ry --rw and --rh also need to be specified.");
+                    System.exit(1);
+                }
+                Integer page = Integer.parseInt(cmd.getOptionValue("page"));
+                Float rectPosX   = Float.parseFloat(cmd.getOptionValue("rx"));
+                Float rectPosY   = Float.parseFloat(cmd.getOptionValue("ry"));
+                Float rectWidth  = Float.parseFloat(cmd.getOptionValue("rw"));
+                Float rectHeight = Float.parseFloat(cmd.getOptionValue("rh"));
+                Float fontSize = 12.f;
+                if (cmd.hasOption("fs")) {
+                    fontSize = Float.parseFloat(cmd.getOptionValue("fs"));
+                }
+                String signText = null;
+                if (cmd.hasOption("signtext")) {
+                    signText  = cmd.getOptionValue("signtext");
+                }
+                batchPDFSign.signFile(page, rectPosX, rectPosY, rectWidth, rectHeight, fontSize, signText);
+            } else {
+                batchPDFSign.signFile();
+            }
         } catch (GeneralSecurityException | IOException | ParseException e) {
             System.out.println(e.getMessage());
             formatter.printHelp("BatchPDFSignPortable", options);
