@@ -5,6 +5,7 @@ import org.apache.commons.cli.*;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.Scanner;
 
 /**
  * This method is called when the jar is executed. It shows the help if parameters weren't given correctly.
@@ -71,6 +72,12 @@ public class Main {
             String outputFilePath = cmd.getOptionValue("output");
             String keyFilePath = cmd.getOptionValue("key");
             String passwordString = cmd.getOptionValue("password");
+            if (passwordString.equals("-")) {
+                Scanner scanner = new Scanner(System.in);
+                if (scanner.hasNextLine()) {
+                    passwordString = scanner.nextLine();
+                }
+            }
             BatchPDFSign batchPDFSign;
             batchPDFSign = new BatchPDFSign(keyFilePath, passwordString, inputFilePath, outputFilePath);
             if (cmd.hasOption("page")) {
