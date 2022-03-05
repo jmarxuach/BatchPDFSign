@@ -66,7 +66,7 @@
     <properties>
         <!-- Dependencies versions -->
         <commons-io.version>2.7</commons-io.version>
-        <itext.version>7.1.11</itext.version>
+        <itext.version>7.2.0</itext.version>
         <bouncycastle.version>1.68</bouncycastle.version>
         <slf4j.version>2.0.0-alpha1</slf4j.version>
         <!-- Project settings -->
