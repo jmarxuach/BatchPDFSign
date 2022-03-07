@@ -34,31 +34,31 @@ public class Main {
         output.setRequired(false);
         options.addOption(output);
 
-        Option pageOpt = new Option("", "page", true, "page of signature rectangle; needs to be specified to output signature rectangle");
+        Option pageOpt = new Option(null, "page", true, "page of signature rectangle; needs to be specified to output signature rectangle");
         output.setRequired(false);
         options.addOption(pageOpt);
 
-        Option rectPosXOpt = new Option("", "rx", true, "x position of signature rectangle");
+        Option rectPosXOpt = new Option(null, "rx", true, "x position of signature rectangle; needs --page to be specified as well");
         output.setRequired(false);
         options.addOption(rectPosXOpt);
 
-        Option rectPosYOpt = new Option("", "ry", true, "y position of signature rectangle");
+        Option rectPosYOpt = new Option(null, "ry", true, "y position of signature rectangle; needs --page to be specified as well");
         output.setRequired(false);
         options.addOption(rectPosYOpt);
 
-        Option rectWidthOpt = new Option("", "rw", true, "width of signature rectangle");
+        Option rectWidthOpt = new Option(null, "rw", true, "width of signature rectangle; needs --page to be specified as well");
         output.setRequired(false);
         options.addOption(rectWidthOpt);
 
-        Option rectHeightOpt = new Option("", "rh", true, "height of signature rectangle");
+        Option rectHeightOpt = new Option(null, "rh", true, "height of signature rectangle; needs --page to be specified as well");
         output.setRequired(false);
         options.addOption(rectHeightOpt);
 
-        Option fontsizeOpt = new Option("", "fs", true, "height of signature rectangle");
+        Option fontsizeOpt = new Option(null, "fs", true, "font size of text in signature rectangle (default: 12); needs --page to be specified as well");
         output.setRequired(false);
         options.addOption(fontsizeOpt);
 
-        Option signTextOpt = new Option("", "signtext", true, "signature text");
+        Option signTextOpt = new Option(null, "signtext", true, "signature text; needs --page to be specified as well");
         output.setRequired(false);
         options.addOption(signTextOpt);
 
