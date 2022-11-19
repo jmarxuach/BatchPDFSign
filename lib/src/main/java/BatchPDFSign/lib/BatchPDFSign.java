@@ -22,6 +22,7 @@ public class BatchPDFSign {
 
 	private static PrivateKey privateKey;
 	private static Certificate[] certificateChain;
+  private static String defaultTsaUri = "https://freetsa.org/tsr";
 
 	private final String pkcs12FileName;
 	private final String PkcsPassword;
@@ -61,14 +62,19 @@ public class BatchPDFSign {
 	 * @throws GeneralSecurityException Some permissions aren't right.
 	 */
 	public void signFile(int page, float rx, float ry, float rw, float rh, float fs, String signtext) throws IOException, GeneralSecurityException {
-
+      signFile(page, rx, ry, rw, rh, fs, signtext, null);
+  }
+	public void signFile(int page, float rx, float ry, float rw, float rh, float fs, String signtext, String tsaUri) throws IOException, GeneralSecurityException {
+    if(tsaUri == null) {
+      tsaUri = defaultTsaUri;
+    }
 		// Check PDF input file
 		if (!inputFile.exists() || inputFile.isDirectory()) {
 			throw new FileNotFoundException("File: " + this.inputFile + " wasn't found");
 		}
 		readPrivateKeyFromPKCS12(pkcs12FileName, PkcsPassword);
 		PdfReader reader = new PdfReader(pdfInputFileName);
-		ITSAClient tsaClient = new TSAClientBouncyCastle("https://freetsa.org/tsr");
+		ITSAClient tsaClient = new TSAClientBouncyCastle(tsaUri);
 		StampingProperties properties = new StampingProperties().preserveEncryption();
 		PdfSigner signer = new PdfSigner(reader, new FileOutputStream(pdfOutputFileName), properties);
 		if (page > 0) {
@@ -96,8 +102,11 @@ public class BatchPDFSign {
 			}
 		}
 	}
+	public void signFile(String tsaUri) throws IOException, GeneralSecurityException {
+		this.signFile(0, 0, 0, 0, 0, 10, "", tsaUri);
+	}
 	public void signFile() throws IOException, GeneralSecurityException {
-		this.signFile(0, 0, 0, 0, 0, 10, "");
+		this.signFile(null);
 	}
 
 	/**
