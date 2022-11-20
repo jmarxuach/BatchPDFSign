@@ -82,6 +82,7 @@ public class Main {
                 if (scanner.hasNextLine()) {
                     passwordString = scanner.nextLine();
                 }
+                scanner.close();
             }
             BatchPDFSign batchPDFSign;
             batchPDFSign = new BatchPDFSign(keyFilePath, passwordString, inputFilePath, outputFilePath);
