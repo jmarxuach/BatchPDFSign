@@ -45,6 +45,7 @@ usage: BatchPDFSignPortable
     --ry <arg>         y position of signature rectangle; needs --page to
                        be specified as well
     --signtext <arg>   signature text; needs --page to be specified as
+    --tsa <arg>        URI of the time service authority (TSA) 
 ```
 
 ### key file path
