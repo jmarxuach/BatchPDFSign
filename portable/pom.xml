@@ -49,7 +49,7 @@
     <properties>
         <!-- Dependencies versions -->
         <commons-cli.version>1.3.1</commons-cli.version>
-        <BatchPDFSignLib.version>1.0.5.3</BatchPDFSignLib.version>
+        <BatchPDFSignLib.version>1.0.5.4</BatchPDFSignLib.version>
         <!-- Project settings -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
