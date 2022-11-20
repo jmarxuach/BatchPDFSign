@@ -62,6 +62,11 @@ public class Main {
         output.setRequired(false);
         options.addOption(signTextOpt);
 
+        Option tsaOpt = new Option(null, "tsa", true, "URI of the time service authority (TSA)");
+        output.setRequired(false);
+        options.addOption(tsaOpt);
+
+
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
         CommandLine cmd;
@@ -80,6 +85,10 @@ public class Main {
             }
             BatchPDFSign batchPDFSign;
             batchPDFSign = new BatchPDFSign(keyFilePath, passwordString, inputFilePath, outputFilePath);
+            String tsaUri = null;
+            if (cmd.hasOption("tsa")) {
+                tsaUri  = cmd.getOptionValue("tsa");
+            }
             if (cmd.hasOption("page")) {
                 if (!cmd.hasOption("rx") || !cmd.hasOption("ry") ||
                     !cmd.hasOption("rw") || !cmd.hasOption("rh")) {
@@ -99,9 +108,9 @@ public class Main {
                 if (cmd.hasOption("signtext")) {
                     signText  = cmd.getOptionValue("signtext");
                 }
-                batchPDFSign.signFile(page, rectPosX, rectPosY, rectWidth, rectHeight, fontSize, signText);
+                batchPDFSign.signFile(page, rectPosX, rectPosY, rectWidth, rectHeight, fontSize, signText, tsaUri);
             } else {
-                batchPDFSign.signFile();
+                batchPDFSign.signFile(tsaUri);
             }
         } catch (GeneralSecurityException | IOException | ParseException e) {
             System.out.println(e.getMessage());
