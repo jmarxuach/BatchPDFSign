@@ -14,7 +14,7 @@
         <dependency>
             <groupId>BatchPDFSign</groupId>
             <artifactId>lib</artifactId>
-            <version>${BatchPDFSignLib.version}</version>
+            <version>1.0.5.4</version>
         </dependency>
     </dependencies>
     <build>
