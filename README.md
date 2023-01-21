@@ -74,6 +74,6 @@ By default, the signature will not be (easily) visible in the final PDF file. If
 ## Development
 You'll need:
 - Maven
-- Java 8 JDK
+- Java 11 JDK
 
 That's all folks....
