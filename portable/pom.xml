@@ -37,6 +37,10 @@
                         <manifest>
                             <mainClass>BatchPDFSign.portable.Main</mainClass>
                         </manifest>
+                        <manifestEntries>
+                            <Add-Exports>jdk.crypto.cryptoki/sun.security.pkcs11 jdk.crypto.cryptoki/sun.security.pkcs11.wrapper java.base/sun.security.action java.base/sun.security.rsa</Add-Exports>
+                            <Add-Opens>java.base/java.security java.base/sun.security.util</Add-Opens>                                   
+                        </manifestEntries>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>

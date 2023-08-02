@@ -1,6 +1,7 @@
 package BatchPDFSign.portable;
 
 import BatchPDFSign.lib.BatchPDFSign;
+import BatchPDFSign.lib.BatchPDFSignSmartCard;
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
@@ -18,15 +19,19 @@ public class Main {
 
         Options options = new Options();
 
+        Option mode = new Option("m", "mode", true, "mode: pkcs12 or pkcs11 (defaults to pkcs12)");
+        mode.setRequired(false);
+        options.addOption(mode);
+
         Option input = new Option("i", "input", true, "input file path");
         input.setRequired(true);
         options.addOption(input);
 
-        Option key = new Option("k", "key", true, "key file path");
+        Option key = new Option("k", "key", true, "key file path (pkcs12) OR HSM/Token config file (pkcs11)");
         key.setRequired(true);
         options.addOption(key);
 
-        Option password = new Option("p", "password", true, "keyfile password");
+        Option password = new Option("p", "password", true, "keyfile password OR PIN/Password");
         password.setRequired(true);
         options.addOption(password);
 
@@ -66,6 +71,13 @@ public class Main {
         output.setRequired(false);
         options.addOption(tsaOpt);
 
+        Option reasonOpt = new Option(null, "reason", true, "Reason field of signature");
+        output.setRequired(false);
+        options.addOption(reasonOpt);
+
+        Option locOpt = new Option(null, "location", true, "Location field of signature");
+        output.setRequired(false);
+        options.addOption(locOpt);
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -73,6 +85,7 @@ public class Main {
 
         try {
             cmd = parser.parse(options, args);
+            String opMode = cmd.getOptionValue("mode", "pkcs12");
             String inputFilePath = cmd.getOptionValue("input");
             String outputFilePath = cmd.getOptionValue("output");
             String keyFilePath = cmd.getOptionValue("key");
@@ -84,34 +97,68 @@ public class Main {
                 }
                 scanner.close();
             }
-            BatchPDFSign batchPDFSign;
-            batchPDFSign = new BatchPDFSign(keyFilePath, passwordString, inputFilePath, outputFilePath);
-            String tsaUri = null;
-            if (cmd.hasOption("tsa")) {
-                tsaUri  = cmd.getOptionValue("tsa");
-            }
-            if (cmd.hasOption("page")) {
-                if (!cmd.hasOption("rx") || !cmd.hasOption("ry") ||
-                    !cmd.hasOption("rw") || !cmd.hasOption("rh")) {
-                    System.out.println("If a page is specified, all of the options --rx --ry --rw and --rh also need to be specified.");
-                    System.exit(1);
+            String reason = cmd.getOptionValue("reason", null);
+            String location = cmd.getOptionValue("location", null);
+            if(opMode.equals("pkcs11")){
+                BatchPDFSignSmartCard batchPDFSign;
+                batchPDFSign = new BatchPDFSignSmartCard(keyFilePath, passwordString, inputFilePath, outputFilePath);
+                String tsaUri = null;
+                if (cmd.hasOption("tsa")) {
+                    tsaUri  = cmd.getOptionValue("tsa");
                 }
-                Integer page = Integer.parseInt(cmd.getOptionValue("page"));
-                Float rectPosX   = Float.parseFloat(cmd.getOptionValue("rx"));
-                Float rectPosY   = Float.parseFloat(cmd.getOptionValue("ry"));
-                Float rectWidth  = Float.parseFloat(cmd.getOptionValue("rw"));
-                Float rectHeight = Float.parseFloat(cmd.getOptionValue("rh"));
-                Float fontSize = 12.f;
-                if (cmd.hasOption("fs")) {
-                    fontSize = Float.parseFloat(cmd.getOptionValue("fs"));
+                if (cmd.hasOption("page")) {
+                    if (!cmd.hasOption("rx") || !cmd.hasOption("ry") ||
+                        !cmd.hasOption("rw") || !cmd.hasOption("rh")) {
+                        System.out.println("If a page is specified, all of the options --rx --ry --rw and --rh also need to be specified.");
+                        System.exit(1);
+                    }
+                    Integer page = Integer.parseInt(cmd.getOptionValue("page"));
+                    Float rectPosX   = Float.parseFloat(cmd.getOptionValue("rx"));
+                    Float rectPosY   = Float.parseFloat(cmd.getOptionValue("ry"));
+                    Float rectWidth  = Float.parseFloat(cmd.getOptionValue("rw"));
+                    Float rectHeight = Float.parseFloat(cmd.getOptionValue("rh"));
+                    Float fontSize = 12.f;
+                    if (cmd.hasOption("fs")) {
+                        fontSize = Float.parseFloat(cmd.getOptionValue("fs"));
+                    }
+                    String signText = null;
+                    if (cmd.hasOption("signtext")) {
+                        signText  = cmd.getOptionValue("signtext");
+                    }
+                    batchPDFSign.signFile(page, rectPosX, rectPosY, rectWidth, rectHeight, fontSize, signText, tsaUri, reason, location);
+                } else {
+                    batchPDFSign.signFile(tsaUri, reason, location);
                 }
-                String signText = null;
-                if (cmd.hasOption("signtext")) {
-                    signText  = cmd.getOptionValue("signtext");
+            }else{
+                BatchPDFSign batchPDFSign;
+                batchPDFSign = new BatchPDFSign(keyFilePath, passwordString, inputFilePath, outputFilePath);
+                String tsaUri = null;
+                if (cmd.hasOption("tsa")) {
+                    tsaUri  = cmd.getOptionValue("tsa");
                 }
-                batchPDFSign.signFile(page, rectPosX, rectPosY, rectWidth, rectHeight, fontSize, signText, tsaUri);
-            } else {
-                batchPDFSign.signFile(tsaUri);
+                if (cmd.hasOption("page")) {
+                    if (!cmd.hasOption("rx") || !cmd.hasOption("ry") ||
+                        !cmd.hasOption("rw") || !cmd.hasOption("rh")) {
+                        System.out.println("If a page is specified, all of the options --rx --ry --rw and --rh also need to be specified.");
+                        System.exit(1);
+                    }
+                    Integer page = Integer.parseInt(cmd.getOptionValue("page"));
+                    Float rectPosX   = Float.parseFloat(cmd.getOptionValue("rx"));
+                    Float rectPosY   = Float.parseFloat(cmd.getOptionValue("ry"));
+                    Float rectWidth  = Float.parseFloat(cmd.getOptionValue("rw"));
+                    Float rectHeight = Float.parseFloat(cmd.getOptionValue("rh"));
+                    Float fontSize = 12.f;
+                    if (cmd.hasOption("fs")) {
+                        fontSize = Float.parseFloat(cmd.getOptionValue("fs"));
+                    }
+                    String signText = null;
+                    if (cmd.hasOption("signtext")) {
+                        signText  = cmd.getOptionValue("signtext");
+                    }
+                        batchPDFSign.signFile(page, rectPosX, rectPosY, rectWidth, rectHeight, fontSize, signText, tsaUri, reason, location);
+                } else {
+                    batchPDFSign.signFile(tsaUri, reason, location);
+                }
             }
         } catch (GeneralSecurityException | IOException | ParseException e) {
             System.out.println(e.getMessage());
